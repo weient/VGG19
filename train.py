@@ -52,14 +52,15 @@ def train(opt):
         path_v = './results/VdcnnIR_val_{}.txt'.format(opt.depth)
     if os.path.exists(path_t):
         os.remove(path_t)
-        os.mknod(path_t)
+        open(path_t, 'a').close()
+        #os.mknod(path_t)
     else:
-        os.mknod(path_t)
+        open(path_t, 'a').close()
     if os.path.exists(path_v):
         os.remove(path_v)
-        os.mknod(path_v)
+        open(path_v, 'a').close()
     else:
-        os.mknod(path_v)
+        open(path_v, 'a').close()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if opt.conv1_1 and opt.depth==16:
         model = Vgg(num_channels=num_channels,num_classes=classes,depth=opt.depth, initialize_weights=True,
