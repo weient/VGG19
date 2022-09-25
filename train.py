@@ -19,9 +19,9 @@ import pickle
 
 def get_args():
     parser = argparse.ArgumentParser("""Very Deep Convolutional Networks for Large Scale Image Recognition""")
-    parser.add_argument('-t', '--train', type=str, default='root', help="""required image dataset for training a model.
+    parser.add_argument('-t', '--train', type=str, default='train', help="""required image dataset for training a model.
                                                                            It must be in the data directory """)
-    parser.add_argument('-v', '--val', type=str, default='root_val', help="""required image dataset for training a model.
+    parser.add_argument('-v', '--val', type=str, default='val', help="""required image dataset for training a model.
                                                                               It must be in the data directory """)
     parser.add_argument('-b', '--batchsize', type=int, choices=[64,128,256, 512], default=64, help='select number of samples to load from dataset')
     parser.add_argument('-e', '--epochs', type=int, choices=[50, 100, 150], default=50)
@@ -37,19 +37,19 @@ def get_args():
 
 def train(opt):
     data_path = '../vgg_data'
-    traindata, trainGenerator, classes = preprocess(path=data_path+os.sep+opt.train, batchsize=opt.batchsize,
+    traindata, trainGenerator, classes = preprocess(path='/content/drive/Shareddrives/Typeface/Very-Deep-Convolutional-Networks-for-Large-Scale-Image-Recognition/data'+os.sep+opt.train, batchsize=opt.batchsize,
                                                     imagesize=opt.imagesize, shuffle=True)
-    valdata, validationGenerator, classes = preprocess(path=data_path+os.sep+opt.val, batchsize=opt.batchsize,
+    valdata, validationGenerator, classes = preprocess(path='/content/drive/Shareddrives/Typeface/Very-Deep-Convolutional-Networks-for-Large-Scale-Image-Recognition/data'+os.sep+opt.val, batchsize=opt.batchsize,
                                                       imagesize=opt.imagesize, shuffle=True)
     # print(iter(trainGenerator).__next__())
 
     num_channels = iter(trainGenerator).__next__()[0].size()[1]
     if opt.conv1_1 and opt.depth == 16:
-        path_t = 'results/VdcnnIR_train_C11_{}.txt'.format(opt.depth)
-        path_v = 'results/VdcnnIR_val_C11_{}.txt'.format(opt.depth)
+        path_t = './results/VdcnnIR_train_C11_{}.txt'.format(opt.depth)
+        path_v = './results/VdcnnIR_val_C11_{}.txt'.format(opt.depth)
     else:
-        path_t = 'results/VdcnnIR_train_{}.txt'.format(opt.depth)
-        path_v = 'results/VdcnnIR_val_{}.txt'.format(opt.depth)
+        path_t = './results/VdcnnIR_train_{}.txt'.format(opt.depth)
+        path_v = './results/VdcnnIR_val_{}.txt'.format(opt.depth)
     if os.path.exists(path_t):
         os.remove(path_t)
         os.mknod(path_t)
