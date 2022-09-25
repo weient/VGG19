@@ -19,13 +19,13 @@ import pickle
 
 def get_args():
     parser = argparse.ArgumentParser("""Very Deep Convolutional Networks for Large Scale Image Recognition""")
-    parser.add_argument('-t', '--train', type=str, default='train', help="""required image dataset for training a model.
+    parser.add_argument('-t', '--train', type=str, default='root', help="""required image dataset for training a model.
                                                                            It must be in the data directory """)
-    parser.add_argument('-v', '--val', type=str, default='val_', help="""required image dataset for training a model.
+    parser.add_argument('-v', '--val', type=str, default='root_val', help="""required image dataset for training a model.
                                                                               It must be in the data directory """)
     parser.add_argument('-b', '--batchsize', type=int, choices=[64,128,256, 512], default=64, help='select number of samples to load from dataset')
     parser.add_argument('-e', '--epochs', type=int, choices=[50, 100, 150], default=50)
-    parser.add_argument('-d', '--depth', type=int, choices=[11,13,16,19], default=11, help='depth of the deep learning model')
+    parser.add_argument('-d', '--depth', type=int, choices=[11,13,16,19], default=19, help='depth of the deep learning model')
     parser.add_argument('-c11', '--conv1_1', action='store_true', default=False,
                         help="""setting it True will replace some of the 3x3 Conv layers with 1x1 Conv layers in the 16 layer network""")
     parser.add_argument('-es', '--early_stopping', type=int, default= 6, help="""early stopping is used to stop training of network, 
@@ -36,9 +36,10 @@ def get_args():
     return args
 
 def train(opt):
-    traindata, trainGenerator, classes = preprocess(path='./data'+os.sep+opt.train, batchsize=opt.batchsize,
+    data_path = '../vgg_data'
+    traindata, trainGenerator, classes = preprocess(path=data_path+os.sep+opt.train, batchsize=opt.batchsize,
                                                     imagesize=opt.imagesize, shuffle=True)
-    valdata, validationGenerator, classes = preprocess(path='./data'+os.sep+opt.val, batchsize=opt.batchsize,
+    valdata, validationGenerator, classes = preprocess(path=data_path+os.sep+opt.val, batchsize=opt.batchsize,
                                                       imagesize=opt.imagesize, shuffle=True)
     # print(iter(trainGenerator).__next__())
 
@@ -109,7 +110,7 @@ def train(opt):
             label = label.to(device)
             # print(data_.size())
             optimizer.zero_grad()
-            prob = model(data_)
+            prob, maps_t = model(data_)
             # print(prob)
             prob_ = np.argmax(prob.detach().cpu(), -1)
             loss = criterion(prob, label)
@@ -138,7 +139,7 @@ def train(opt):
             data_e = data_e.to(device)
             label_e= label_e.to(device)
             with torch.no_grad():
-                prob_e = model(data_e)
+                prob_e, maps_v = model(data_e)
                 loss_v = criterion(prob_e, label_e)
                 pred_e = np.argmax(prob_e.detach().cpu(),-1)
                 val_loss.append(loss_v.item()*len(label_e.cpu()))

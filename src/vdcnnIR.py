@@ -29,6 +29,17 @@ class ConvBlock(nn.Module):
         output = self.relu(output)
         return output
 
+class SaveLayer(nn.Module):
+    def __init__(self):
+        super(SaveLayer, self).__init__()
+        self.maps = []
+    
+    def forward(self, x):
+        # Do your print / debug stuff here
+        self.maps.append(x)
+        return x
+    def get_maps(self):
+        return self.maps
 
 class Vgg(nn.Module):
     def __init__(self, num_channels, num_classes, depth, conv1_1= False, initialize_weights=True ):
@@ -36,6 +47,7 @@ class Vgg(nn.Module):
         self.num_channels = num_channels
         self.num_classes = num_classes
         self.depth = depth
+        self.save_layer = SaveLayer()
         layers = []
         fc_layers = []
         base_features = 64
@@ -49,17 +61,19 @@ class Vgg(nn.Module):
             num_conv_blocks = [1, 1, 3, 3, 4]
 
         layers.append(ConvBlock(input_features=num_channels, output_features=base_features, kernel=3, padding=1, stride=1))
+        layers.append(self.save_layer)
         for _ in range(num_conv_blocks[0]):
             layers.append(ConvBlock(input_features=base_features, output_features=base_features, kernel=3, padding=1,stride=1))
         layers.append(nn.MaxPool2d(kernel_size=2,stride=2))
 
         layers.append(ConvBlock(input_features=base_features, output_features=2*base_features, kernel=3, padding=1, stride=1))
+        layers.append(self.save_layer)
         for _ in range(num_conv_blocks[1]):
             layers.append(ConvBlock(input_features=2*base_features, output_features=2*base_features, kernel=3, padding=1,stride=1))
         layers.append(nn.MaxPool2d(kernel_size=2,stride=2))
 
         layers.append(ConvBlock(input_features=2*base_features, output_features=4*base_features, kernel=3, padding=1, stride=1))
-
+        layers.append(self.save_layer)
         if conv1_1:
             for _ in range(num_conv_blocks[2]-1):
                 layers.append(
@@ -73,7 +87,7 @@ class Vgg(nn.Module):
         layers.append(nn.MaxPool2d(kernel_size=2,stride=2))
 
         layers.append(ConvBlock(input_features=4*base_features, output_features=8*base_features, kernel=3, padding=1, stride=1))
-
+        layers.append(self.save_layer)
         if conv1_1:
             for _ in range(num_conv_blocks[3]-1):
                 layers.append(
@@ -87,7 +101,7 @@ class Vgg(nn.Module):
                     ConvBlock(input_features=8 * base_features, output_features=8 * base_features, kernel=3, padding=1,
                               stride=1))
         layers.append(nn.MaxPool2d(kernel_size=2,stride=2))
-
+        first = True
         if conv1_1:
             for _ in range(num_conv_blocks[4] - 1):
                 layers.append(
@@ -101,9 +115,13 @@ class Vgg(nn.Module):
                 layers.append(
                     ConvBlock(input_features=8 * base_features, output_features=8 * base_features, kernel=3, padding=1,
                               stride=1))
+                if first:
+                  layers.append(self.save_layer)
+                  first = False
         layers.append(nn.AdaptiveAvgPool2d(2))
         fc_layers.extend([nn.Linear(in_features=2*2*(8*base_features), out_features= base_features*base_features),nn.ReLU()])
         fc_layers.extend([nn.Linear(in_features=base_features*base_features, out_features= base_features*base_features),nn.ReLU()])
+        fc_layers.append(self.save_layer)
         fc_layers.extend([nn.Linear(in_features=base_features*base_features, out_features= self.num_classes)])
         self.layers = nn.Sequential(*layers)
         self.fc_layers = nn.Sequential(*fc_layers)
@@ -129,6 +147,9 @@ class Vgg(nn.Module):
         output = output.view(output.size(0), -1)
         # print(output.size())
         output = self.fc_layers(output)
-        return output
+        maps = self.save_layer.maps
+        self.save_layer.maps = []
+        # print("maps : ", len(maps))
+        return output, maps
 
 
