@@ -19,9 +19,9 @@ import pickle
 
 def get_args():
     parser = argparse.ArgumentParser("""Very Deep Convolutional Networks for Large Scale Image Recognition""")
-    parser.add_argument('-t', '--train', type=str, default='train', help="""required image dataset for training a model.
+    parser.add_argument('-t', '--train', type=str, default='root', help="""required image dataset for training a model.
                                                                            It must be in the data directory """)
-    parser.add_argument('-v', '--val', type=str, default='val', help="""required image dataset for training a model.
+    parser.add_argument('-v', '--val', type=str, default='root', help="""required image dataset for training a model.
                                                                               It must be in the data directory """)
     parser.add_argument('-b', '--batchsize', type=int, choices=[64,128,256, 512], default=64, help='select number of samples to load from dataset')
     parser.add_argument('-e', '--epochs', type=int, choices=[50, 100, 150], default=50)
@@ -37,12 +37,18 @@ def get_args():
 
 def train(opt):
     data_path = '../vgg_data'
+    traindata, trainGenerator, classes = preprocess(path=data_path+os.sep+opt.train, batchsize=opt.batchsize,
+                                                    imagesize=opt.imagesize, shuffle=True)
+    valdata, validationGenerator, classes = preprocess(path=data_path+os.sep+opt.val, batchsize=opt.batchsize,
+                                                      imagesize=opt.imagesize, shuffle=True)
+    '''
     traindata, trainGenerator, classes = preprocess(path='/content/drive/Shareddrives/Typeface/Very-Deep-Convolutional-Networks-for-Large-Scale-Image-Recognition/data'+os.sep+opt.train, batchsize=opt.batchsize,
                                                     imagesize=opt.imagesize, shuffle=True)
     valdata, validationGenerator, classes = preprocess(path='/content/drive/Shareddrives/Typeface/Very-Deep-Convolutional-Networks-for-Large-Scale-Image-Recognition/data'+os.sep+opt.val, batchsize=opt.batchsize,
                                                       imagesize=opt.imagesize, shuffle=True)
+    '''
     # print(iter(trainGenerator).__next__())
-
+    print("classes: ", classes)
     num_channels = iter(trainGenerator).__next__()[0].size()[1]
     if opt.conv1_1 and opt.depth == 16:
         path_t = './results/VdcnnIR_train_C11_{}.txt'.format(opt.depth)
@@ -114,6 +120,9 @@ def train(opt):
             prob, maps_t = model(data_)
             # print(prob)
             prob_ = np.argmax(prob.detach().cpu(), -1)
+            print("prob: ", prob.size())
+            print("label: ", label.size())
+
             loss = criterion(prob, label)
             train_loss.append(loss.item()*len(label.cpu()))
             loss.backward()
