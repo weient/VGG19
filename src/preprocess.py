@@ -11,7 +11,7 @@ import numpy as np
 
 
 def preprocess(path, batchsize, imagesize, shuffle = True):
-    transform = tf.Compose([tf.Scale((imagesize,imagesize)),
+    transform = tf.Compose([tf.Resize((64, 256)),
                             tf.RandomHorizontalFlip(),
                             tf.ToTensor(),
                             tf.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))])

@@ -149,7 +149,12 @@ class Vgg(nn.Module):
         output = self.fc_layers(output)
         maps = self.save_layer.maps
         self.save_layer.maps = []
-        # print("maps : ", len(maps))
+        print("maps 0: ", maps[0].size())
+        print("maps 1: ", maps[1].size())
+        print("maps 2: ", maps[2].size())
+        print("maps 3: ", maps[3].size())
+        print("maps 4: ", maps[4].size())
+        print("maps 5: ", maps[5].size())
         return output, maps
 
 
