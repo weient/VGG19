@@ -122,7 +122,7 @@ class Vgg(nn.Module):
         fc_layers.extend([nn.Linear(in_features=2*2*(8*base_features), out_features= base_features*base_features),nn.ReLU()])
         fc_layers.extend([nn.Linear(in_features=base_features*base_features, out_features= base_features*base_features),nn.ReLU()])
         fc_layers.append(self.save_layer)
-        fc_layers.extend([nn.Linear(in_features=base_features*base_features, out_features= self.num_classes)])
+        fc_layers.extend([nn.Linear(in_features=base_features*base_features, out_features= self.num_classes), nn.Softmax(dim = 1)])
         self.layers = nn.Sequential(*layers)
         self.fc_layers = nn.Sequential(*fc_layers)
         if initialize_weights:
@@ -147,14 +147,9 @@ class Vgg(nn.Module):
         output = output.view(output.size(0), -1)
         # print(output.size())
         output = self.fc_layers(output)
+        #print(output)
         maps = self.save_layer.maps
         self.save_layer.maps = []
-        print("maps 0: ", maps[0].size())
-        print("maps 1: ", maps[1].size())
-        print("maps 2: ", maps[2].size())
-        print("maps 3: ", maps[3].size())
-        print("maps 4: ", maps[4].size())
-        print("maps 5: ", maps[5].size())
         return output, maps
 
 

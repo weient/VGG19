@@ -21,7 +21,7 @@ def get_args():
     parser = argparse.ArgumentParser("""Very Deep Convolutional Networks for Large Scale Image Recognition""")
     parser.add_argument('-t', '--train', type=str, default='root', help="""required image dataset for training a model.
                                                                            It must be in the data directory """)
-    parser.add_argument('-v', '--val', type=str, default='root', help="""required image dataset for training a model.
+    parser.add_argument('-v', '--val', type=str, default='root_val', help="""required image dataset for training a model.
                                                                               It must be in the data directory """)
     parser.add_argument('-b', '--batchsize', type=int, choices=[64,128,256, 512], default=64, help='select number of samples to load from dataset')
     parser.add_argument('-e', '--epochs', type=int, choices=[50, 100, 150], default=50)
@@ -120,8 +120,8 @@ def train(opt):
             prob, maps_t = model(data_)
             # print(prob)
             prob_ = np.argmax(prob.detach().cpu(), -1)
-            print("prob: ", prob.size())
-            print("label: ", label.size())
+            
+            #print("label: ", label)
 
             loss = criterion(prob, label)
             train_loss.append(loss.item()*len(label.cpu()))
